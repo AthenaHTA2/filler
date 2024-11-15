@@ -16,4 +16,4 @@ WORKDIR /filler/
 # This will allow us to run the container and play the game inside it
 # by choosing the map and the players in command:
 # ./game_engine -f maps/map01 -p1 target/release/filler -p2 robots/bender 
-ENTRYPOINT /bin/bash
+ENTRYPOINT ["/bin/bash", "-c"]

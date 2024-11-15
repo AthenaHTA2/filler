@@ -13,7 +13,7 @@ sudo docker build -t filler .
 sudo docker run --name fillercontainer -v "$(pwd)/solution":/filler/solution -it filler /bin/bash -c "
     cd /filler/solution &&
     cargo build --release &&
-    ./game_engine -f maps/map01 -p1 target/release/filler -p2 robots/bender 
+    ./linux_game_engine -f maps/map01 -p1 target/release/filler -p2 robots/bender 
 "
 
 # List Docker images
