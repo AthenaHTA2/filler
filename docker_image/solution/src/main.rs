@@ -75,7 +75,8 @@ fn main() {
         expand_left(&anfield, &piece, &tokens)
     };
 
-    let (x_opp, y_opp) = find_opponent(&anfield, &tokens);
+    // Find the opponent's last cell
+    let (foe_x, foe_y) = find_opponent(&anfield, &tokens);
 
     // Output the coordinates to the game engine
     //println!("{} {}", x, y);
