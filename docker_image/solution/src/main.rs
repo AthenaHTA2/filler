@@ -1,6 +1,6 @@
 //main.rs is the entry point of the program
 use std::io::{self, BufRead, Write};
-use filler_lib::{Tokens, expand_right, check_right, expand_left, check_left};
+use filler_lib::{Tokens, expand_right, check_right, expand_left, check_left, find_opponent};
 
 fn main() {
 
@@ -68,6 +68,14 @@ fn main() {
     let (x, y) = expand_right(&anfield, &piece, &tokens);
     //check if last character can be used as anchor for next piece
     let (available) = check_right(&anfield, &piece, &tokens);
+
+    let(x, y) = if available {
+        (x, y)
+    } else {
+        expand_left(&anfield, &piece, &tokens)
+    };
+
+    let (x_opp, y_opp) = find_opponent(&anfield, &tokens);
 
     // Output the coordinates to the game engine
     //println!("{} {}", x, y);
