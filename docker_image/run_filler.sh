@@ -10,20 +10,20 @@ sudo docker system prune -a -f
 sudo docker build -t filler .
 
 # Run the Docker container and name it fillercontainer
-sudo docker run --name fillercontainer -v "$(pwd)/solution":/filler/solution -it filler /bin/bash -c "
-    cd /filler/solution &&
-    cargo build --release &&
-    ./linux_game_engine -f maps/map01 -p1 target/release/filler -p2 robots/bender 
-"
+sudo docker run --name fillercontainer -v "$(pwd)/solution":/filler/solution -it filler /filler/solution/run_game.sh
+    #cd /filler/solution && \
+    #cargo build --release && \
+    #./linux_game_engine -f maps/map01 -p1 target/release/filler -p2 linux_robots/bender 
+
 
 # List Docker images
-sudo docker image ls
+#sudo docker image ls
 
 # List all Docker containers
-sudo docker ps -a
+#sudo docker ps -a
 
 # Open a bash shell in the running container
-sudo docker exec -it fillercontainer /bin/bash
+#sudo docker exec -it fillercontainer /bin/bash
 
 # List files in the current directory
-ls -l
+#ls -l

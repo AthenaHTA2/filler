@@ -1,31 +1,33 @@
 //lib.rs handles the logic of the program
 
-use std::io::{self, Write};
-use std::env;
+//use std::io::{self, Write};
+//use std::env;
+use::std::collections::VecDeque;
 
 pub struct Tokens {
     pub my_last: char,
-    pub my_terrytory: char,
+    pub my_territory: char,
     pub opponent_last: char,
-    pub opponent_terrytory: char,
+    pub opponent_territory: char,
+    pub anfield_empty: char,
 }
 
-pub impl Tokens {
+impl Tokens {
     pub fn new(my_number: usize) -> Self {
         if my_number == 1 {
             Tokens {
                 my_last: 'a',
-                my_terrytory: '@',
+                my_territory: '@',
                 opponent_last: 's',
-                opponent_terrytory: '$',
+                opponent_territory: '$',
                 anfield_empty: '.',
             }
         } else {
             Tokens {
                 my_last: 's',
-                my_terrytory: '$',
+                my_territory: '$',
                 opponent_last: 'a',
-                opponent_terrytory: '@',
+                opponent_territory: '@',
                 anfield_empty: '.',
             }
         }
@@ -35,19 +37,19 @@ pub impl Tokens {
 //get coordinates of my last piece's final character
 //in order to put the new piece to the right of it
 pub fn expand_right(
-    anfield: &Vec<String>,
-    piece: &Vec<String>,
+    anfield: &VecDeque<String>,
     tokens: &Tokens,
 ) -> (usize, usize) {
 
     // Get my symbol's last character's row
-    let mut y usize = 0;
+    //to remove the warning message use let mut y: Option<usize> = None;
+    let mut y: usize = 0;
     let mut find_symbol = tokens.my_territory;
 
     //Anfield contains only one my_territory character when the game starts
     //Hence need to check if my_last character is present in the Anfield
     let contains_my_last = anfield.iter().any(|line| line.contains(tokens.my_last));
-    if contains_my_last = false {
+    if contains_my_last == false {
         //find_symbol = tokens.my_territory;
     }else{
         find_symbol = tokens.my_last;
@@ -55,6 +57,7 @@ pub fn expand_right(
     for (i, line) in anfield.iter().enumerate() {
         if line.contains(&format!("{}{}", find_symbol, tokens.anfield_empty)) {
             // The line contains '.' followed by '@' or 'a'     
+            //y = Some(i);
             y = i;
             break;
         }
@@ -77,46 +80,42 @@ pub fn expand_right(
 
 //check if last character can be used as anchor for next piece
 pub fn check_right(
-    anfield: &Vec<String>,
+    anfield: &VecDeque<String>,
     piece: &Vec<String>,
     tokens: &Tokens,
 ) -> bool {
 
     // Find the last cell of my previous piece
-    let (last_x, last_y) = expand_right(&anfield, &piece, &tokens);
+    let (last_x, last_y) = expand_right(&anfield, &tokens);
 
-    //determine if there is sufficient space to place piece
-    (last_x + 1..=last_x + piece[0].len()-1).for_each(|x| {
-        (last_y..=last_y + piece.len()-1).for_each(|y| {
-            if anfield[y][x] == tokens.anfield_empty &&
-            x < anfield[0].len() && y < anfield.len() {
-                continue;
-            }else{
+    // Determine if there is sufficient space to place the piece
+    for x in last_x + 1..=last_x + piece[0].len() - 1 {
+        for y in last_y..=last_y + piece.len() - 1 {
+            if x >= anfield[0].len() || y >= anfield.len() || anfield[y].chars().nth(x) != Some(tokens.anfield_empty) {
                 return false;
             }
-        });
-    });
+        }
+    }
 
-    return true;
-
+    true
 }
 
 //get coordinates to anchor the new piece
-//to the left of my territory
+//to the left of my territory or my last piece
 pub fn expand_left(
-    anfield: &Vec<String>,
+    anfield: &VecDeque<String>,
     piece: &Vec<String>,
     tokens: &Tokens,
 ) -> (usize, usize) {
 
-    // Find row that contains anfield_empty and my_terrytory characters, e.g. '.@'
+    // Find row that contains anfield_empty and my_territory characters, e.g. '.@'
     let mut y: usize = 0;
     let mut find_symbol = tokens.my_territory;
 
     //Anfield contains only one my_territory character when the game starts
     //Hence need to check if my_last character is present in the Anfield
     let contains_my_last = anfield.iter().any(|line| line.contains(tokens.my_last));
-    if contains_my_last = false {
+    if contains_my_last == false {
         //find_symbol = tokens.my_territory;
     }else{
         find_symbol = tokens.my_last;
@@ -148,7 +147,7 @@ pub fn expand_left(
 //check if cell at the left of my territory 
 //can be used as anchor for my next piece
 pub fn check_left(
-    anfield: &Vec<String>,
+    anfield: &VecDeque<String>,
     piece: &Vec<String>,
     tokens: &Tokens,
 ) -> bool {
@@ -157,29 +156,26 @@ pub fn check_left(
     let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
 
     //determine if there is sufficient space to place piece
-    (left_x -1..=left_x - piece[0].len()-1).for_each(|x| {
-        (left_y..=left_y + piece.len()-1).for_each(|y| {
-            if anfield[y][x] == tokens.anfield_empty &&
-            x >= 0 &&
-            y < anfield.len() {
-                continue;
-            }else{
+    for x in left_x - 1..=left_x - piece[0].len()-1 {
+        for y in left_y..=left_y + piece.len()-1 {
+            if x <= 0 || y >= anfield.len() || anfield[y].chars().nth(x) != Some(tokens.anfield_empty) {
                 return false;
             }
-        });
-    });
+        }
+    }
 
-    return true;
+    true
 
 }
 
 pub fn find_opponent(
-    anfield: &Vec<String>,
+    anfield: &VecDeque<String>,
     tokens: &Tokens,
 ) -> (usize, usize) {
 
     // Find opponent's last character's row
     let mut y: usize = 0;
+    let mut x: usize = 0;
     let mut y_a: usize = 0;
     let mut y_b: usize = 0;
     let mut y_me: usize = 0;
@@ -204,11 +200,11 @@ pub fn find_opponent(
 
     for (i, line) in anfield.iter().enumerate() {
         if line.contains(&format!("{}{}", opponent_symbol, tokens.anfield_empty)) {
-            // The line contains '.' followed by opponent symbol
+        // The line contains opponent symbol followed by '.'    
             y_a = i;
         }
         if line.contains(&format!("{}{}", tokens.anfield_empty, opponent_symbol)) {
-            // The line contains opponent symbol followed by '.'
+            // The line contains '.' followed by opponent symbol
             y_b = i;
         }
         if line.contains(&format!("{}{}", my_symbol, tokens.anfield_empty)) {
@@ -220,7 +216,7 @@ pub fn find_opponent(
     }
 
     // Find the row where the opponent is closest to my last character
-    let mut x = 0;
+    
     if (y_me as isize - y_a as isize).abs() < (y_me as isize - y_b as isize).abs() {
         y = y_a;
         for (i, ch) in anfield[y].chars().enumerate() {
@@ -242,7 +238,7 @@ pub fn find_opponent(
             }
         }
     }
-
+    
     (x, y)
 }
 
