@@ -77,3 +77,12 @@ LABEL description="Project forum Created by Sonal, Nathan, Kingsley, Helena"
 # Tell Docker to execute the 'binaryForum' command when this image is used to start a container.
 ENTRYPOINT [ "/forum/binaryForum" ]
 ```
+
+#### Note to self on *error sending data: write 1: |broken pipe*
+
+*Meaning of pipe in linux:* 
+A form of redirecting output to another destination for further processing.
+Can also be used to combine two or more commands or programs.
+
+*What is Docker shell*
+Docker shell acts as an interface through which the execution of commands in the container occurs. Usually, when a container is started, it has to run a shell to interpret and execute the commands either described in the Dockerfile or passed when the container is run

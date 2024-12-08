@@ -1,7 +1,6 @@
 //lib.rs handles the logic of the program
 
-//use std::io::{self, Write};
-//use std::env;
+
 use::std::collections::VecDeque;
 
 pub struct Tokens {
@@ -54,16 +53,17 @@ pub fn expand_right(
     }else{
         find_symbol = tokens.my_last;
     }
+        //get the row index
     for (i, line) in anfield.iter().enumerate() {
         if line.contains(&format!("{}{}", find_symbol, tokens.anfield_empty)) {
-            // The line contains '.' followed by '@' or 'a'     
+            // The line contains '@' or 'a' followed by '.'    
             //y = Some(i);
             y = i;
             break;
         }
     }
 
-    // Get find_symbol's last character's column
+    // find_symbol's column
     let mut x = 0;
     for (i, ch) in anfield[y].chars().enumerate() {
         if ch == find_symbol && 
@@ -88,11 +88,30 @@ pub fn check_right(
     // Find the last cell of my previous piece
     let (last_x, last_y) = expand_right(&anfield, &tokens);
 
-    // Determine if there is sufficient space to place the piece
-    for x in last_x + 1..=last_x + piece[0].len() - 1 {
-        for y in last_y..=last_y + piece.len() - 1 {
-            if x >= anfield[0].len() || y >= anfield.len() || anfield[y].chars().nth(x) != Some(tokens.anfield_empty) {
-                return false;
+    // Cycle through the piece and only flag those cells 
+    // that contain a '0', and provided anfield's cell is available
+
+    for (i, row) in piece.iter().enumerate() {
+        for (j, cell) in row.chars().enumerate() {
+            if cell == '0' {
+                let x = last_x + j;
+                let y = last_y + i;
+
+                let anfield_yx = anfield[y].chars().nth(x);
+
+                if i == 0 && j == 0 {
+                    // If indexes i and j equal '0', the Anfield cell 
+                    //can be either my_last or my_territory character
+                    if anfield_yx != Some(tokens.my_last) && anfield_yx != Some(tokens.my_territory) {
+                        return false;
+                    }
+                } else {
+                    // If indexes i and j are not equal to 0, 
+                    //then the Anfield cell should be equal to anfield_empty
+                    if anfield_yx != Some(tokens.anfield_empty) {
+                        return false;
+                    }
+                }
             }
         }
     }
@@ -132,9 +151,9 @@ pub fn expand_left(
     let mut x = 0;
     for (i, ch) in anfield[y].chars().enumerate() {
         if ch == find_symbol &&
-        i >= piece[0].len() &&
-        anfield[y].chars().nth(i - piece[0].len() -1) == Some(tokens.anfield_empty) {
-            x = i - piece[0].len() -1;
+        i > 0 &&
+        anfield[y].chars().nth(i - (piece[0].len() - 1)) == Some(tokens.anfield_empty) {
+            x = i - (piece[0].len() -1);
             break;
         }
     }
@@ -155,6 +174,39 @@ pub fn check_left(
     // Find coordinates for my next piece
     let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
 
+// Cycle through the piece and only flag those cells 
+    // that contain a '0', and provided anfield's cell is available
+
+    for (i, row) in piece.iter().enumerate() {
+        for (j, cell) in row.chars().enumerate() {
+            if cell == '0' {
+                let x = left_x - j;
+                let y = left_y + i;
+
+                let anfield_yx = anfield[y].chars().nth(x);
+
+                if i == 0 && j == 0 {
+                    // If indexes i and j equal '0', the Anfield cell 
+                    //can be either my_last or my_territory character
+                    if anfield_yx != Some(tokens.my_last) && anfield_yx != Some(tokens.my_territory) {
+                        return false;
+                    }
+                } else {
+                    // If indexes i and j are not equal to 0, 
+                    //then the Anfield cell should be equal to anfield_empty
+                    if anfield_yx != Some(tokens.anfield_empty) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    true
+}
+
+
+    /*start of old logic
     //determine if there is sufficient space to place piece
     for x in left_x - 1..=left_x - piece[0].len()-1 {
         for y in left_y..=left_y + piece.len()-1 {
@@ -166,7 +218,11 @@ pub fn check_left(
 
     true
 
-}
+     //end of old logic
+    */
+   
+
+//}
 
 pub fn find_opponent(
     anfield: &VecDeque<String>,
@@ -241,5 +297,8 @@ pub fn find_opponent(
     
     (x, y)
 }
+
+
+
 
     
