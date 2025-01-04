@@ -11,7 +11,8 @@
 
 # How to run filler inside Docker
 
-- Before running the application, add the *linux_robots* and the *linux_game_engine* executables from *https://assets.01-edu.org/filler/filler.zip* to the docker_image folder.
+1. Before running the application, add the *linux_robots* and the *linux_game_engine* executables from *https://assets.01-edu.org/filler/filler.zip* to the docker_image folder.
+
 
 - Download & turn on the docker application on your local device
 

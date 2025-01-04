@@ -14,3 +14,4 @@ name = "filler"
 path = "solution/src/main.rs"
 
 [dependencies]
+#enigo = "0.3.0"

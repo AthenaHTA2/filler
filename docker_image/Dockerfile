@@ -1,4 +1,9 @@
-FROM rust:1.63-buster
+ FROM rust:1.63-buster
+# Using 1.73.0-buster because of error: 
+# package `bumpalo v3.16.0` cannot be built 
+# because it requires rustc 1.73.0 or newer, 
+# while the currently active rustc version is 1.63.0
+#FROM rust:1.73.0-buster
 
 # Copy the maps directory to /filler/maps
 COPY ./maps /filler/maps
