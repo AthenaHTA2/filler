@@ -22,7 +22,8 @@ sudo docker run --name fillercontainer -v "$(pwd)/solution":/filler/solution -it
 #   ./linux_game_engine -f maps/map00 -p1 linux_robots/bender -p2 linux_robots/h2_d2 RUST_BACKTRACE=1
 #"
 
-#./linux_game_engine -f maps/map00 -p1 linux_robots/bender -p2 solution/target/release/filler
+#./linux_game_engine -f maps/map00 -p1 linux_robots/bender -p2 solution/target/release/filler RUST_BACKTRACE=1
+#./linux_game_engine -f maps/map00 -p1 solution/target/release/filler -p2 linux_robots/bender RUST_BACKTRACE=1
 # List Docker images
 #sudo docker image ls
 

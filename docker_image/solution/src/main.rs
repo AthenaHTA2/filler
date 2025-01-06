@@ -2,7 +2,7 @@
 
 use filler_lib::{check_left, check_right, expand_left, expand_right, find_opponent, Tokens};
 use std::collections::VecDeque;
-use std::io::{self, BufRead, Read, Write};
+use std::io::{self, Read, Write};
 
 /*
 // This did not work: Import the Enigo trait used for simulating the Enter key press
@@ -12,7 +12,11 @@ use enigo::{
     Enigo, Key, Keyboard, Mouse, Settings,
 };
 */
-//Code that takes in all input at once
+
+/*
+//========================================================
+//START OF VERSION 1: Code that takes in all input at once
+//========================================================
 fn main() {
     let stdin = io::stdin();
     /*
@@ -132,7 +136,7 @@ fn main() {
         .trim_end_matches(':')
         .parse()
         .unwrap();
-        //println!("piece_height:{}", piece_height);
+        println!("piece_height:{}", piece_height);
 
         //My code stops at this point and completes after I press the Enter key
         let mut piece = Vec::new();
@@ -145,9 +149,8 @@ fn main() {
             
             if let Some(piece_line) = lines.next() {
                 //if i == piece_height - 1 {
-                    
                     piece.push(piece_line.trim().to_string());
-                    println!("inside piece height -1:{:?}", piece);
+                    println!("inside piece height: {} {:?}", i, piece);
                     
                     //does not work: simulating pressing the Enter key
                     //let _ = enigo.key(Key::Return, Click);
@@ -155,7 +158,7 @@ fn main() {
                 } else {
                     
                     //piece.push(piece_line.trim().to_string());
-                    println!("No more input or error reading at line {}", i);
+                    //println!("No more input or error reading at line {}", i);
                     break;
                 }
             //} else {
@@ -177,7 +180,7 @@ fn main() {
         let available_right = check_right(&anfield, &piece, &tokens);
         println!("available_right:{}", available_right);
         let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
-        //println!("left_x:{} left_y:{}", left_x, left_y);
+        println!("left_x:{} left_y:{}", left_x, left_y);
         let available_left = check_left(&anfield, &piece, &tokens);
         println!("available_left:{}", available_left);
         // Find the opponent's last cell
@@ -204,17 +207,21 @@ fn main() {
   
 }
 
-/*
+//========================================================
+//END OF VERSION 1: Code that takes in all input at once
+//========================================================
+*/
+
 //======================================================
-//START of Code that takes in all input at once
+//START OF VERSION 2: Code that takes in all input at once
 //======================================================
 //No error but code stops at line 108
 fn main() {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
     let mut lines = input.lines();
-    //print!("input all at once: {:?}", input);
-    let mut stdout = io::stdout();
+    print!("input all at once: {:?}", input);
+    let stdout = io::stdout();
 
     // Read player information
     // that is sent just once at the start
@@ -292,15 +299,16 @@ fn main() {
 
         // Read the piece dimensions and shape
         let piece_info = lines.next().unwrap();
-        let mut piece_dimensions: Vec<&str> = piece_info
+        let piece_dimensions: Vec<&str> = piece_info
         .split_whitespace()
         .collect();
 
         //remove the colon at the end and parse the number of rows
-        let mut piece_height: usize = piece_dimensions[2]
+        let piece_height: usize = piece_dimensions[2]
         .trim_end_matches(':')
         .parse()
         .unwrap();
+        println!("piece_height:{}", piece_height);
 
         //MY CODE STOPS AT THIS POINT and completes after I press the Enter key
         let mut piece = Vec::new();
@@ -309,11 +317,11 @@ fn main() {
         // Create an instance of Enigo
         //let mut enigo = Enigo::new(&Settings::default()).unwrap();
         
-        for i in 0..piece_height {
+        for _i in 0..piece_height {
             
             if let Some(piece_line) = lines.next() {
                     piece.push(piece_line.trim().to_string());
-                    //println!("inside piece height -1:{:?}", piece);
+                    println!("piece: {:?}", piece);
                 } else {
                     //println!("no more piece lines");
                 }
@@ -324,18 +332,18 @@ fn main() {
         // Simple approach: place the piece so its first cell
         // will sit on my previous piece's last cell, if possible
         let (right_x, right_y) = expand_right(&anfield, &tokens);
-        
+        println!("right_x:{} right_y:{}", right_x, right_y);
         //check if last character to the right can be used as anchor for next piece
         let available_right = check_right(&anfield, &piece, &tokens);
-        
+        println!("available_right:{}", available_right);
         let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
-        
+        println!("left_x:{} left_y:{}", left_x, left_y);
         let available_left = check_left(&anfield, &piece, &tokens);
-        
+        println!("available_left: {}", available_left);
         // Find the opponent's last cell
         let (foe_x, foe_y) = find_opponent(&anfield, &tokens);
-        
-        let (mut x, mut y): (usize, usize) = (0, 0);
+        println!("foe_x: {} foe_y: {}", foe_x, foe_y);
+        let (mut x, mut y): (usize, usize) = (foe_x, foe_y);
 
         if available_right {
             (x, y) = (right_x, right_y);
@@ -343,7 +351,7 @@ fn main() {
             (x, y) = (left_x, left_y);
         } else {
             //kill the game
-            (x, y) = (foe_x, foe_y);
+            //(x, y) = (foe_x, foe_y);
         };
 
         let mut lock_out = stdout.lock();
@@ -353,10 +361,9 @@ fn main() {
   
 }
 
-*/
 
 //======================================================
-//END of Code that takes in all input at once
+//END OF VERSION 2: Code that takes in all input at once
 //======================================================
 
 //End of my code that takes input at once

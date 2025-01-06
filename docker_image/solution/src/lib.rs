@@ -120,9 +120,12 @@ pub fn expand_left(
     tokens: &Tokens,
 ) -> (usize, usize) {
     //println!("Inside expand_left");
+    //remember: row number is y, column number is x
     // Find row that contains anfield_empty and my_territory characters, e.g. '.@'
     let mut y: usize = 0;
     let mut find_symbol = tokens.my_territory;
+    //declare column that contains find_symbol
+    let mut x = 0;
 
     //Anfield contains only one my_territory character when the game starts
     //Hence need to check if my_last character is present in the Anfield
@@ -132,24 +135,25 @@ pub fn expand_left(
     } else {
         find_symbol = tokens.my_last;
     }
+    //Now find the row number (= y) that contains 'find_symbol' preceeded by a dot
     for (i, line) in anfield.iter().enumerate() {
         if line.contains(&format!("{}{}", tokens.anfield_empty, find_symbol)) {
             // The line contains '.' followed by '@' or 'a'
             y = i;
+            //println!("inside expand_left, y (= row number) is: {}", y);
             break;
         }
     }
-
-    // Find column so that new piece can overlap one symbol '@' or 'a'
-    let mut x = 0;
+    //println!("inside expand_left, y (= row number) is: {}", y);
+    // Find column (= x)so that new piece can overlap one symbol '@' or 'a'
     for (i, ch) in anfield[y].chars().enumerate() {
-        if ch == find_symbol
-            && i > 0
-            && anfield[y].chars().nth(i - (piece[0].len() - 1)) == Some(tokens.anfield_empty)
-        {
-            x = i - (piece[0].len() - 1);
-            break;
-        }
+        if ch == find_symbol {
+          // if  i - (piece[0].len()-1) >= 0
+           //&& anfield[y].chars().nth(i - (piece[0].len()-1)) == Some(tokens.anfield_empty) {
+                x = i - (piece[0].len()-1);
+                
+                break;
+        } 
     }
 
     (x, y)
@@ -161,6 +165,10 @@ pub fn check_left(anfield: &VecDeque<String>, piece: &Vec<String>, tokens: &Toke
     //println!("Inside check_left");
     // Find coordinates for my next piece
     let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
+    println!("inside check_left left_x: {}, left_y: {}", left_x, left_y);
+    if left_x == 0 && left_y == 0 {
+        return false;
+    }
 
     // Cycle through the piece and only flag those cells
     // that contain a '0', and provided anfield's cell is available
@@ -168,8 +176,16 @@ pub fn check_left(anfield: &VecDeque<String>, piece: &Vec<String>, tokens: &Toke
     for (i, row) in piece.iter().enumerate() {
         for (j, cell) in row.chars().enumerate() {
             if cell == '0' {
+                //Anfield position
                 let x = left_x - j;
                 let y = left_y + i;
+                if y > anfield.len() -1 {
+                    return false;
+                    //try drawing the piece upwards
+                   // y = y - (i+1);
+                }else{
+                    // y = left_y + i;
+                }
 
                 let anfield_yx = anfield[y].chars().nth(x);
 
@@ -196,12 +212,12 @@ pub fn check_left(anfield: &VecDeque<String>, piece: &Vec<String>, tokens: &Toke
 
 pub fn find_opponent(anfield: &VecDeque<String>, tokens: &Tokens) -> (usize, usize) {
     //println!("Inside find_opponent");
-    // Find opponent's last character's row
-    let mut y: usize = 0;
-    let mut x: usize = 0;
     let mut y_a: usize = 0;
     let mut y_b: usize = 0;
     let mut y_me: usize = 0;
+    // Find opponent's last character's row
+    let mut y: usize = y_b;
+    let mut x: usize = 0;
 
     let mut opponent_symbol = tokens.opponent_territory;
     // Check if Anfield contains opponent's last character
@@ -254,7 +270,7 @@ pub fn find_opponent(anfield: &VecDeque<String>, tokens: &Tokens) -> (usize, usi
             }
         }
     } else {
-        y = y_b;
+        //y = y_b;
         for (i, ch) in anfield[y].chars().enumerate() {
             if ch == opponent_symbol
                 && i >= 1
