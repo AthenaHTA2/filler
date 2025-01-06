@@ -13,6 +13,17 @@
 
 1. Before running the application, add the *linux_robots* and the *linux_game_engine* executables from *https://assets.01-edu.org/filler/filler.zip* to the docker_image folder.
 
+1.1 In your laptop's root folder, install the libxdo-dev dependency of the enigo package:
+```script
+sudo apt-get update
+sudo apt-get install libxdo-dev
+```
+
+You might run following command in laptop's home directory:
+```shell
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+```
+
 
 - Download & turn on the docker application on your local device
 

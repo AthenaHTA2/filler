@@ -2,46 +2,28 @@
 
 use filler_lib::{check_left, check_right, expand_left, expand_right, find_opponent, Tokens};
 use std::collections::VecDeque;
-use std::io::{self, Read, Write};
+use std::io::{self, BufRead, Read, Write};
 
-/*
-// This did not work: Import the Enigo trait used for simulating the Enter key press
+//Import the Enigo trait used for simulating the Enter key press
 use enigo::{
-    Button, Coordinate,
-    Direction::{Click, Press, Release},
-    Enigo, Key, Keyboard, Mouse, Settings,
+    Direction::Click,
+    Enigo, Key, Keyboard, Settings,
 };
-*/
 
-/*
+
+
 //========================================================
 //START OF VERSION 1: Code that takes in all input at once
 //========================================================
 fn main() {
-    let stdin = io::stdin();
-    /*
-    let mut input_lines = Vec::new();
-    for line in stdin.lock().lines() {
-        match line {
-            Ok(content) => input_lines.push(content),
-            Err(_) => break,
-        }
-    }
-
-    for line in input_lines {
-        println!("received line: {}", line);}
-    */
-
-
-    
-    
+    let stdin = io::stdin();  
     //Test to see the actual game engine input
     // Read all input lines at once
     let mut lines = stdin.lock().lines().map(|l| l.unwrap());
     //The println! macro will lock the standard output on each call.
     //If you call println! within a hot loop, this behavior may be the bottleneck of the loop.
     //To avoid this, lock stdout with io::stdout().lock():
-    let mut stdout = io::stdout();
+    let stdout = io::stdout();
 
     // Read player information
     // that is sent just once at the start
@@ -59,7 +41,7 @@ fn main() {
         .unwrap()
         .to_digit(10)
         .unwrap() as usize;
-
+    /*
     //read player 2 info
     let p2_info = lines.next().unwrap();
     //split_whitespace returns an iterator over a slice of sub-strings;
@@ -86,6 +68,8 @@ fn main() {
     println!("me:{:?}", me);
 
     let tokens = Tokens::new(me);
+    */
+    let tokens = Tokens::new(p1);
 
     // Continuously read Anfield and piece data and print the coordinates of the next move
     loop {
@@ -122,50 +106,51 @@ fn main() {
         //now remove the slice at index '0'
         //because don't need column headings
         anfield.pop_front();
-        println!("anfield: {:?}", anfield); 
+        //println!("anfield: {:?}", anfield); 
 
         // Read the piece dimensions and shape
         let piece_info = lines.next().unwrap();
-        let mut piece_dimensions: Vec<&str> = piece_info
+        let piece_dimensions: Vec<&str> = piece_info
         .split_whitespace()
         .collect();
         //println!("piece_dimensions:{:?}", piece_dimensions);
         //not used: let piece_width: usize = piece_dimensions[1].parse().unwrap();
         //remove the colon at the end and parse the number of rows
-        let mut piece_height: usize = piece_dimensions[2]
+        let piece_height: usize = piece_dimensions[2]
         .trim_end_matches(':')
         .parse()
         .unwrap();
-        println!("piece_height:{}", piece_height);
+        //println!("piece_height:{}", piece_height);
 
         //My code stops at this point and completes after I press the Enter key
         let mut piece = Vec::new();
         //below loop is equivalent to line below:
         //let piece: VecDeque<String> = (0..piece_height).map(|_| lines.next().unwrap()).collect();
         // Create an instance of Enigo
-        //let mut enigo = Enigo::new(&Settings::default()).unwrap();
+        let mut enigo = Enigo::new(&Settings::default()).unwrap();
         
         for i in 0..piece_height {
             
             if let Some(piece_line) = lines.next() {
-                //if i == piece_height - 1 {
+                if i == piece_height - 1 {
                     piece.push(piece_line.trim().to_string());
-                    println!("inside piece height: {} {:?}", i, piece);
+                    //println!("inside piece height: {} {:?}", i, piece);
                     
                     //does not work: simulating pressing the Enter key
-                    //let _ = enigo.key(Key::Return, Click);
-                   // break
+                    //let _ = Keyboard::key(/* value */,Key::Return, Click);
+                    let _ = enigo.key(Key::Return, Click);
+                    // break
                 } else {
                     
-                    //piece.push(piece_line.trim().to_string());
+                    piece.push(piece_line.trim().to_string());
                     //println!("No more input or error reading at line {}", i);
                     break;
                 }
-            //} else {
+            } else {
              //   println!("inside piece else arm");
-                //let _ = enigo.key(Key::Return, Click);
+                let _ = enigo.key(Key::Return, Click);
                 //break;
-            //}
+            }
         }
         
         //println!("piece:{:?}", piece);
@@ -175,18 +160,18 @@ fn main() {
         // Simple approach: place the piece so its first cell
         // will sit on my previous piece's last cell, if possible
         let (right_x, right_y) = expand_right(&anfield, &tokens);
-        println!("right_x:{} right_y:{}", right_x, right_y);
+        //println!("right_x:{} right_y:{}", right_x, right_y);
         //check if last character to the right can be used as anchor for next piece
         let available_right = check_right(&anfield, &piece, &tokens);
-        println!("available_right:{}", available_right);
+        //println!("available_right:{}", available_right);
         let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
-        println!("left_x:{} left_y:{}", left_x, left_y);
+        //println!("left_x:{} left_y:{}", left_x, left_y);
         let available_left = check_left(&anfield, &piece, &tokens);
-        println!("available_left:{}", available_left);
+        //println!("available_left:{}", available_left);
         // Find the opponent's last cell
         let (foe_x, foe_y) = find_opponent(&anfield, &tokens);
-        println!("foe_x:{} foe_y:{}", foe_x, foe_y);
-        let (mut x, mut y): (usize, usize) = (0, 0);
+        //println!("foe_x:{} foe_y:{}", foe_x, foe_y);
+        let (mut x, mut y): (usize, usize) = (foe_x, foe_y);
 
         if available_right {
             (x, y) = (right_x, right_y);
@@ -194,7 +179,7 @@ fn main() {
             (x, y) = (left_x, left_y);
         } else {
             //kill the game
-            (x, y) = (foe_x, foe_y);
+            //(x, y) = (foe_x, foe_y);
         };
 
         // Debugging statement to verify output
@@ -210,23 +195,24 @@ fn main() {
 //========================================================
 //END OF VERSION 1: Code that takes in all input at once
 //========================================================
-*/
 
+/*
 //======================================================
 //START OF VERSION 2: Code that takes in all input at once
 //======================================================
-//No error but code stops at line 108
+//No error but code does not print nor complete
 fn main() {
     let mut input = String::new();
-    io::stdin().read_to_string(&mut input).unwrap();
+    println!("Reading input...");
+    io::stdin().read_to_string(&mut input).expect("Failed to read input");
     let mut lines = input.lines();
-    print!("input all at once: {:?}", input);
+    println!("Input read successfully");
     let stdout = io::stdout();
 
     // Read player information
     // that is sent just once at the start
-    let p1_info = lines.next().unwrap();
-
+    let p1_info = lines.next().expect("Failed to read player 1 info");
+    println!("p1_info: {}", p1_info);
     //split_whitespace returns an iterator over a slice of sub-strings;
     //nth returns the specific substring, indexes start from 0;
     //unwrap() is used to get the value from the Option
@@ -238,8 +224,11 @@ fn main() {
         .last()
         .unwrap()
         .to_digit(10)
-        .unwrap() as usize;
+        .expect("Failed to convert player 1 number to digit") as usize;
 
+    println!("p1: {}", p1);
+    /*
+    //I am removing player 2 info in case game engine does not send it
     //read player 2 info
     let p2_info = lines.next().unwrap();
     //split_whitespace returns an iterator over a slice of sub-strings;
@@ -263,18 +252,19 @@ fn main() {
         //me = p2;
     }
     println!("me:{:?}",me);
-
+    
     let tokens = Tokens::new(me);
+    */
+    let tokens = Tokens::new(p1);
+
     loop {
-        let anfield_info = lines.next().unwrap();
-        let dimensions: Vec<&str> = anfield_info
-        .split_whitespace()
-        .collect();
+        println!("Reading anfield info...");
+        let anfield_info = lines.next().expect("Failed to read anfield info");
+        println!("anfield_info: {}", anfield_info);
+        let dimensions: Vec<&str> = anfield_info.split_whitespace().collect();
         // Remove the colon at the end and parse the number of rows
-        let rows: usize = dimensions[2]
-        .trim_end_matches(':')
-        .parse()
-        .unwrap();
+        let rows: usize = dimensions[2].trim_end_matches(':').parse().expect("Failed to parse rows");
+        println!("rows: {}", rows);
         //I am using VecDeque because I need to remove the first element
         //and the VecDeque has the pop_front() method
 
@@ -283,7 +273,7 @@ fn main() {
         //note that 0..rows yields values from 0 (inclusive) to rows (exclusive)
         //I add 1 to account for column headings which which are later removed
         for _ in 0..rows + 1 {
-            let line = lines.next().unwrap();
+            let line = lines.next().expect("Failed to read anfield line");
             //remove row number and space at the beginning
             let off_with_head: Vec<&str> = line.split_whitespace().collect();
             if off_with_head.len() > 1 {
@@ -298,32 +288,26 @@ fn main() {
         println!("anfield: {:?}", anfield);
 
         // Read the piece dimensions and shape
-        let piece_info = lines.next().unwrap();
-        let piece_dimensions: Vec<&str> = piece_info
-        .split_whitespace()
-        .collect();
+        println!("Reading piece info...");
+        let piece_info = lines.next().expect("Failed to read piece info");
+        let piece_dimensions: Vec<&str> = piece_info.split_whitespace().collect();
 
         //remove the colon at the end and parse the number of rows
-        let piece_height: usize = piece_dimensions[2]
-        .trim_end_matches(':')
-        .parse()
-        .unwrap();
+        let piece_height: usize = piece_dimensions[2].trim_end_matches(':').parse().expect("Failed to parse piece height");
         println!("piece_height:{}", piece_height);
 
-        //MY CODE STOPS AT THIS POINT and completes after I press the Enter key
         let mut piece = Vec::new();
         //below loop is equivalent to line below:
         //let piece: VecDeque<String> = (0..piece_height).map(|_| lines.next().unwrap()).collect();
         // Create an instance of Enigo
         //let mut enigo = Enigo::new(&Settings::default()).unwrap();
         
-        for _i in 0..piece_height {
-            
+        for _i in 0..piece_height {        
             if let Some(piece_line) = lines.next() {
                     piece.push(piece_line.trim().to_string());
-                    println!("piece: {:?}", piece);
+                    println!("piece_line: {}", piece_line);
                 } else {
-                    //println!("no more piece lines");
+                    println!("no more piece lines");
                 }
         }
         println!("piece: {:?}", piece);
@@ -349,19 +333,15 @@ fn main() {
             (x, y) = (right_x, right_y);
         } else if available_left {
             (x, y) = (left_x, left_y);
-        } else {
-            //kill the game
-            //(x, y) = (foe_x, foe_y);
-        };
+        }
 
         let mut lock_out = stdout.lock();
-        write!(lock_out, "{} {}\n", x, y).unwrap();
-        lock_out.flush().unwrap();
+        write!(lock_out, "{} {}\n", x, y).expect("Failed to write output");
+        lock_out.flush().expect("Failed to flush output");
     }
-  
 }
 
-
+*/
 //======================================================
 //END OF VERSION 2: Code that takes in all input at once
 //======================================================

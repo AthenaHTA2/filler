@@ -1,9 +1,16 @@
- FROM rust:1.63-buster
-# Using 1.73.0-buster because of error: 
+# FROM rust:1.63-buster
+# Using 1.75.0-buster because of error: 
+FROM rust:1.75-buster
 # package `bumpalo v3.16.0` cannot be built 
 # because it requires rustc 1.73.0 or newer, 
 # while the currently active rustc version is 1.63.0
 #FROM rust:1.73.0-buster
+# install the necessary dependencies
+# libxdo-dev is required for the xdo crate
+# and remove the apt cache
+RUN apt-get update && apt-get install -y \
+    libxdo-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the maps directory to /filler/maps
 COPY ./maps /filler/maps
