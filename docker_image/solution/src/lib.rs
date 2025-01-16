@@ -82,11 +82,13 @@ pub fn check_right(anfield: &VecDeque<String>, piece: &Vec<String>, tokens: &Tok
 
     // Cycle through the piece and only flag those cells
     // that contain a '0', and provided anfield's cell is available
-
+    
+    let mut nr = 0;
     for (i, row) in piece.iter().enumerate() {
         for (j, cell) in row.chars().enumerate() {
-            if cell == '0' {
-                let x = last_x + j;
+            if cell == 'O' {
+                nr = nr + 1;
+                let x = last_x + nr;
                 let y = last_y + i;
 
                 let anfield_yx = anfield[y].chars().nth(x);
@@ -147,10 +149,11 @@ pub fn expand_left(
     //println!("inside expand_left, y (= row number) is: {}", y);
     // Find column (= x)so that new piece can overlap one symbol '@' or 'a'
     for (i, ch) in anfield[y].chars().enumerate() {
-        if ch == find_symbol {
+        if ch == find_symbol && anfield[y].chars().nth(i -1) == Some(tokens.anfield_empty) {
           // if  i - (piece[0].len()-1) >= 0
            //&& anfield[y].chars().nth(i - (piece[0].len()-1)) == Some(tokens.anfield_empty) {
-                x = i - (piece[0].len()-1);
+           //     x = i - (piece[0].len()-1);
+            x = i;
                 
                 break;
         } 
@@ -165,7 +168,7 @@ pub fn check_left(anfield: &VecDeque<String>, piece: &Vec<String>, tokens: &Toke
     //println!("Inside check_left");
     // Find coordinates for my next piece
     let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
-    println!("inside check_left left_x: {}, left_y: {}", left_x, left_y);
+    //println!("inside check_left left_x: {}, left_y: {}", left_x, left_y);
     if left_x == 0 && left_y == 0 {
         return false;
     }
@@ -175,16 +178,21 @@ pub fn check_left(anfield: &VecDeque<String>, piece: &Vec<String>, tokens: &Toke
 
     for (i, row) in piece.iter().enumerate() {
         for (j, cell) in row.chars().enumerate() {
-            if cell == '0' {
+            let mut nr = 0;
+            if cell == 'O' {
+                nr = nr + 1;
                 //Anfield position
-                let x = left_x - j;
+                let x = left_x - nr;
                 let y = left_y + i;
                 if y > anfield.len() -1 {
                     return false;
                     //try drawing the piece upwards
                    // y = y - (i+1);
-                }else{
+                }else if x < 0 {
+                    return false;
                     // y = left_y + i;
+                }else{
+
                 }
 
                 let anfield_yx = anfield[y].chars().nth(x);
@@ -242,16 +250,18 @@ pub fn find_opponent(anfield: &VecDeque<String>, tokens: &Tokens) -> (usize, usi
     for (i, line) in anfield.iter().enumerate() {
         if line.contains(&format!("{}{}", opponent_symbol, tokens.anfield_empty)) {
             // The line contains opponent symbol followed by '.'
+            //println!("y_a: {}", i);
             y_a = i;
         }
         if line.contains(&format!("{}{}", tokens.anfield_empty, opponent_symbol)) {
             // The line contains '.' followed by opponent symbol
+            //println!("y_b: {}", i);
             y_b = i;
         }
         if line.contains(&format!("{}{}", my_symbol, tokens.anfield_empty)) {
             // The line contains my symbol followed by '.'
             //to do: I could check if Anfield contains '.' followed by my symbol
-
+            //println!("y_me: {}", i);
             y_me = i;
         }
     }
@@ -260,27 +270,44 @@ pub fn find_opponent(anfield: &VecDeque<String>, tokens: &Tokens) -> (usize, usi
 
     if (y_me as isize - y_a as isize).abs() < (y_me as isize - y_b as isize).abs() {
         y = y_a;
+        //println!("me is closer to a: {}", y);
         for (i, ch) in anfield[y].chars().enumerate() {
             if ch == opponent_symbol
                 && i + 1 < anfield[y].len()
                 && anfield[y].chars().nth(i + 1) == Some(tokens.anfield_empty)
             {
                 x = i;
+                //println!(" foe_x: {}", x);
                 break;
             }
         }
     } else {
-        //y = y_b;
+        y = y_b;
+        //println!("me is closer to b: {}", y);
         for (i, ch) in anfield[y].chars().enumerate() {
             if ch == opponent_symbol
                 && i >= 1
                 && anfield[y].chars().nth(i - 1) == Some(tokens.anfield_empty)
             {
                 x = i;
+                //println!(" foe_x: {}", x);
                 break;
             }
         }
     }
 
     (x, y)
+}
+
+//This code takes the text string slice argument and calls the lines method on it, 
+//which returns an iterator over the lines/chars in the string. 
+//If text is the empty string, this call to next will return None.
+//If text is not the empty string, next will return a Some value 
+//containing a string slice of the first line in text.
+//The ? extracts the string slice, and we can call chars on that string slice to get an iterator of its characters. 
+//We’re interested in the last character in this first line, so we call last 
+//to return the last item in the iterator. 
+
+fn last_char_of_first_line(text: &str) -> Option<char> {
+    text.lines().next()?.chars().last()
 }

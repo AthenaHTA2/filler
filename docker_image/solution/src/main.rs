@@ -12,9 +12,9 @@ use enigo::{
 
 
 
-//========================================================
-//START OF VERSION 1: Code that takes in all input at once
-//========================================================
+//==============================================================================
+//START OF VERSION 1: Code that takes in all input at once but returns EOF error
+//==============================================================================
 fn main() {
     let stdin = io::stdin();  
     //Test to see the actual game engine input
@@ -41,7 +41,7 @@ fn main() {
         .unwrap()
         .to_digit(10)
         .unwrap() as usize;
-    /*
+    
     //read player 2 info
     let p2_info = lines.next().unwrap();
     //split_whitespace returns an iterator over a slice of sub-strings;
@@ -65,11 +65,9 @@ fn main() {
         //me = p2;
     }
 
-    println!("me:{:?}", me);
+    //println!("me:{:?}", me);
 
     let tokens = Tokens::new(me);
-    */
-    let tokens = Tokens::new(p1);
 
     // Continuously read Anfield and piece data and print the coordinates of the next move
     loop {
@@ -127,33 +125,34 @@ fn main() {
         //below loop is equivalent to line below:
         //let piece: VecDeque<String> = (0..piece_height).map(|_| lines.next().unwrap()).collect();
         // Create an instance of Enigo
-        let mut enigo = Enigo::new(&Settings::default()).unwrap();
+        //let mut enigo = Enigo::new(&Settings::default()).unwrap();
         
         for i in 0..piece_height {
             
             if let Some(piece_line) = lines.next() {
-                if i == piece_height - 1 {
-                    piece.push(piece_line.trim().to_string());
-                    //println!("inside piece height: {} {:?}", i, piece);
+                piece.push(piece_line.trim().to_string());
+               // if i == piece_height - 1 {
+                    //piece.push(piece_line.trim().to_string());
+                 //   println!("inside piece height: {} {:?}", i, piece);
                     
                     //does not work: simulating pressing the Enter key
                     //let _ = Keyboard::key(/* value */,Key::Return, Click);
-                    let _ = enigo.key(Key::Return, Click);
+                    //let _ = enigo.key(Key::Return, Click);
                     // break
-                } else {
+               // } else if i < piece_height - 1 {
                     
-                    piece.push(piece_line.trim().to_string());
-                    //println!("No more input or error reading at line {}", i);
-                    break;
-                }
-            } else {
-             //   println!("inside piece else arm");
-                let _ = enigo.key(Key::Return, Click);
-                //break;
+                //    piece.push(piece_line.trim().to_string());
+                 //   println!("No more input or error reading at line {}", i);
+                    //break;
+                //}
+            } else{
+                //println!("inside piece None at line: {}", i);
+                //let _ = enigo.key(Key::Return, Click);
+                break;
             }
         }
         
-        //println!("piece:{:?}", piece);
+        //println!("out of piece loop:{:?}", piece);
 
         //eprintln!("piece:{:?}", piece);
         // Determine the next move
@@ -192,27 +191,29 @@ fn main() {
   
 }
 
-//========================================================
-//END OF VERSION 1: Code that takes in all input at once
-//========================================================
+
+
+//============================================================================
+//END OF VERSION 1: Code that takes in all input at once but returns EOF error
+//============================================================================
 
 /*
-//======================================================
-//START OF VERSION 2: Code that takes in all input at once
-//======================================================
+//======================================================================
+//START OF VERSION 2: Code that takes in all input at once but times out
+//======================================================================
 //No error but code does not print nor complete
 fn main() {
     let mut input = String::new();
-    println!("Reading input...");
+    //println!("Reading input...");
     io::stdin().read_to_string(&mut input).expect("Failed to read input");
     let mut lines = input.lines();
-    println!("Input read successfully");
+    //println!("Input read successfully");
     let stdout = io::stdout();
 
     // Read player information
     // that is sent just once at the start
     let p1_info = lines.next().expect("Failed to read player 1 info");
-    println!("p1_info: {}", p1_info);
+    //println!("p1_info: {}", p1_info);
     //split_whitespace returns an iterator over a slice of sub-strings;
     //nth returns the specific substring, indexes start from 0;
     //unwrap() is used to get the value from the Option
@@ -226,8 +227,8 @@ fn main() {
         .to_digit(10)
         .expect("Failed to convert player 1 number to digit") as usize;
 
-    println!("p1: {}", p1);
-    /*
+    //println!("p1: {}", p1);
+    
     //I am removing player 2 info in case game engine does not send it
     //read player 2 info
     let p2_info = lines.next().unwrap();
@@ -251,20 +252,20 @@ fn main() {
     } else {
         //me = p2;
     }
-    println!("me:{:?}",me);
+    //println!("me:{:?}",me);
     
     let tokens = Tokens::new(me);
-    */
-    let tokens = Tokens::new(p1);
+    
+    //let tokens = Tokens::new(p1);
 
     loop {
-        println!("Reading anfield info...");
+        //println!("Reading anfield info...");
         let anfield_info = lines.next().expect("Failed to read anfield info");
-        println!("anfield_info: {}", anfield_info);
+        //println!("anfield_info: {}", anfield_info);
         let dimensions: Vec<&str> = anfield_info.split_whitespace().collect();
         // Remove the colon at the end and parse the number of rows
         let rows: usize = dimensions[2].trim_end_matches(':').parse().expect("Failed to parse rows");
-        println!("rows: {}", rows);
+        //println!("rows: {}", rows);
         //I am using VecDeque because I need to remove the first element
         //and the VecDeque has the pop_front() method
 
@@ -285,16 +286,16 @@ fn main() {
         //now remove the slice at index '0'
         //because don't need column headings
         anfield.pop_front();
-        println!("anfield: {:?}", anfield);
+        //println!("anfield: {:?}", anfield);
 
         // Read the piece dimensions and shape
-        println!("Reading piece info...");
+        //println!("Reading piece info...");
         let piece_info = lines.next().expect("Failed to read piece info");
         let piece_dimensions: Vec<&str> = piece_info.split_whitespace().collect();
 
         //remove the colon at the end and parse the number of rows
         let piece_height: usize = piece_dimensions[2].trim_end_matches(':').parse().expect("Failed to parse piece height");
-        println!("piece_height:{}", piece_height);
+        //println!("piece_height:{}", piece_height);
 
         let mut piece = Vec::new();
         //below loop is equivalent to line below:
@@ -310,23 +311,23 @@ fn main() {
                     println!("no more piece lines");
                 }
         }
-        println!("piece: {:?}", piece);
+        //println!("piece: {:?}", piece);
 
         // Determine the next move
         // Simple approach: place the piece so its first cell
         // will sit on my previous piece's last cell, if possible
         let (right_x, right_y) = expand_right(&anfield, &tokens);
-        println!("right_x:{} right_y:{}", right_x, right_y);
+        //println!("right_x:{} right_y:{}", right_x, right_y);
         //check if last character to the right can be used as anchor for next piece
         let available_right = check_right(&anfield, &piece, &tokens);
-        println!("available_right:{}", available_right);
+        //println!("available_right:{}", available_right);
         let (left_x, left_y) = expand_left(&anfield, &piece, &tokens);
-        println!("left_x:{} left_y:{}", left_x, left_y);
+        //println!("left_x:{} left_y:{}", left_x, left_y);
         let available_left = check_left(&anfield, &piece, &tokens);
-        println!("available_left: {}", available_left);
+        //println!("available_left: {}", available_left);
         // Find the opponent's last cell
         let (foe_x, foe_y) = find_opponent(&anfield, &tokens);
-        println!("foe_x: {} foe_y: {}", foe_x, foe_y);
+        //println!("foe_x: {} foe_y: {}", foe_x, foe_y);
         let (mut x, mut y): (usize, usize) = (foe_x, foe_y);
 
         if available_right {
@@ -341,12 +342,16 @@ fn main() {
     }
 }
 
-*/
-//======================================================
-//END OF VERSION 2: Code that takes in all input at once
-//======================================================
 
+//====================================================================
+//END OF VERSION 2: Code that takes in all input at once but times out
+//====================================================================
+*/
 //End of my code that takes input at once
+
+
+
+
 
 //Below is prior version of my code, that takes input line by line.
 //First, have changed so it uses read instead of read_line

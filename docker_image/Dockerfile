@@ -5,8 +5,9 @@ FROM rust:1.75-buster
 # because it requires rustc 1.73.0 or newer, 
 # while the currently active rustc version is 1.63.0
 #FROM rust:1.73.0-buster
-# install the necessary dependencies
-# libxdo-dev is required for the xdo crate
+
+# Install the libxdo-dev dependency
+# that is required for the xdo and enigo crates
 # and remove the apt cache
 RUN apt-get update && apt-get install -y \
     libxdo-dev \
